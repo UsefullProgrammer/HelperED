@@ -37,6 +37,7 @@ namespace AutoPilotNet
         bool bSendKey = true;
         bool Helper = true;
         bool optimize = true;
+        int reportlevel = 0;
         bool reportkeysend = false;
         bool Pause = false;
         //-------------
@@ -208,14 +209,14 @@ namespace AutoPilotNet
                 mousesim.LeftButtonUp();
             }
         }
-        private void SendKeys(VirtualKeyCode VKC, int TimesDown = 3,bool _SendKey = false,bool keyup = true, bool scanmouse = false,bool KeyPress = false)
+        private void SendKeys(VirtualKeyCode VKC, int TimesDown = 3, bool _SendKey = false, bool keyup = true, bool scanmouse = false, bool KeyPress = false, bool experimental = true)
         {
             if (TimesDown < 3)
                 TimesDown = 3;
             if (_SendKey == false || scanmouse)
                 _SendKey = bSendKey;
             
-            if(!_SendKey)
+            if(!_SendKey) 
             {
                 Report("Can't send key for option bSendKEy");
                 return;
@@ -239,7 +240,8 @@ namespace AutoPilotNet
             WindowsInput.MouseSimulator mousesim = new WindowsInput.MouseSimulator(isKeySend);
             if (debug) Report("Begin send key: " + VKC.ToString());
             bool fakehuman = false;
-            Thread.Sleep(1000);
+            if(!scanmouse) Thread.Sleep(1000);
+             
             //if (!UseMouse && !fakehuman)
             //{
             //    isKeyboard.KeyPress(VKC);
@@ -897,7 +899,7 @@ namespace AutoPilotNet
                             double[] minValues, maxValues;
                             Point[] minLocations, maxLocations;
                             result.MinMax(out minValues, out maxValues, out minLocations, out maxLocations);
-                            if(writereport)
+                            if(writereport && reportlevel > 3)
                                 Report("Risultato trovato: " + maxValues[0]);
                             // You can try different values of the threshold. I guess somewhere between 0.75 and 0.95 would be good.
                             if (maxValues[0] > Precision)//primo trovato
@@ -1045,7 +1047,7 @@ namespace AutoPilotNet
             bwAutopilot.RunWorkerAsync();
         }
         int timetravel   = 15000;
-        int jumpingtime  = 15000;
+        int jumpingtime  = 20000;
         int jumpcooldown = 10000;
         KeyboardHook keyboardFromProcessing;
         DateTime pausetime = DateTime.Now;
@@ -1054,7 +1056,7 @@ namespace AutoPilotNet
         DateTime dateTravel = DateTime.Now;
         bool autoscan = true;
         byte Tryed = 0;
-        byte LimitTry = 30;
+        byte LimitTry = 17;
         private void Bot_Helper_ED()
         {
             while (true)
@@ -1081,14 +1083,14 @@ namespace AutoPilotNet
                             Tryed = 0;
                             Report("In charging jumping");
                             //chargingjumping
-                            Thread.Sleep((int)(jumpingtime/2));
+                            Thread.Sleep((int)(jumpingtime));
                             PrecJumping = 0.45;
                             _jkeypress = false;
                             havepressj = true;
                             dateTravel = DateTime.Now;
                         }
-                        else if(!havepressj)
-                            Thread.Sleep(jumpingtime/2);
+                        //else if(!havepressj)
+                        //    Thread.Sleep(jumpingtime/4);
                         if (bMassLocked)
                         {
                             Report("In MassLocked AP suspend");
@@ -1099,7 +1101,7 @@ namespace AutoPilotNet
                             sw.Start();
                             continue;
                         }
-                        else if ( havepressj && dateTravel.AddMilliseconds(jumpingtime*3) > DateTime.Now
+                        else if ( havepressj
                             && (!FindTemplate(Screen4, Jumping, PrecJumping, true,true).IsEmpty || !FindTemplate(Screen4, Jumping2, PrecJumping, true, true).IsEmpty))
                         { //se è in salto non fare niente controllare per quando esce!
                             Report("In jumping");
@@ -1113,31 +1115,44 @@ namespace AutoPilotNet
                         }
                         else
                         {
-                            
+
                             if (bJumped)
                             {
                                 Report("Leave by jumping");
                                 bJumped = false;
                                 havepressj = false;
                                 ZeroThrust();
-                                Report("Auto scan system run");
+                                if (reportlevel > 0)
+                                    Report("Auto scan system run");
                                 SendKeys(VirtualKeyCode.OEM_MINUS, 30 * 6, true, true, true);
                                 int TimeForNextJump = (int)((jumpingtime + jumpcooldown) * 0.9);
                                 sw.Stop();
                                 Thread.Sleep(TimeForNextJump);
                                 sw.Start();
                                 //manovra d'evasione
-                            }else
-                            {
+                            }
+                            else
+                            {//sistema ricorsivo di controllo.
+
                                 //Thread.Sleep(msRefresh);
-                                if (Tryed > LimitTry)
+                                if (Tryed > LimitTry)//troppi tentativi
                                 {
                                     havepressj = false;
                                     Tryed = 0;
+                                    Thread.Sleep(msRefresh * 12);
                                 }
                                 if (havepressj)
+                                {
                                     Tryed++;
+                                    if (dateTravel.AddMilliseconds(jumpingtime * 3) > DateTime.Now)//troppo tempo
+                                    {
+                                        bJumped = false;
+                                        havepressj = false;
+                                        Thread.Sleep(msRefresh * 12);
+                                    }
+                                }
                             }
+                            
                             //if (debug)
                             //    Report("Check if not want jump");
                             //if (false && !bJumped && FindTemplate(Screen4, ISystem, 0.51,false,debug).IsEmpty)
@@ -1147,7 +1162,7 @@ namespace AutoPilotNet
                             //    Thread.Sleep(timetravel + jumpingtime/2);
                             //    sw.Start();
                             //}
-                           
+
                         }
                         
                     }
@@ -1282,7 +1297,7 @@ namespace AutoPilotNet
                 //    bwAutoFire.RunWorkerAsync();
                 //}
             }
-            if (false && Keys.Insert == e.KeyCode)
+            if (debug && Keys.Insert == e.KeyCode)
             {
                 SendKeys(VirtualKeyCode.DOWN, 2, false, false,false,true);
                 SendKeys(VirtualKeyCode.VK_S, 30 , false, false);

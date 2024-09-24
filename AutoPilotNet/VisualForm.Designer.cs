@@ -82,7 +82,7 @@ namespace AutoPilotNet
             // 
             // IMTEMP
             // 
-            this.IMTEMP.Location = new System.Drawing.Point(186, 459);
+            this.IMTEMP.Location = new System.Drawing.Point(646, 459);
             this.IMTEMP.Name = "IMTEMP";
             this.IMTEMP.Size = new System.Drawing.Size(144, 131);
             this.IMTEMP.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -101,40 +101,44 @@ namespace AutoPilotNet
             // 
             // IBScreen1
             // 
+            this.IBScreen1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.IBScreen1.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.IBScreen1.Location = new System.Drawing.Point(336, 459);
+            this.IBScreen1.Location = new System.Drawing.Point(202, 112);
             this.IBScreen1.Name = "IBScreen1";
-            this.IBScreen1.Size = new System.Drawing.Size(149, 131);
+            this.IBScreen1.Size = new System.Drawing.Size(404, 225);
             this.IBScreen1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.IBScreen1.TabIndex = 5;
             this.IBScreen1.TabStop = false;
             // 
             // IBScreen2
             // 
+            this.IBScreen2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.IBScreen2.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.IBScreen2.Location = new System.Drawing.Point(491, 459);
+            this.IBScreen2.Location = new System.Drawing.Point(406, 3);
             this.IBScreen2.Name = "IBScreen2";
-            this.IBScreen2.Size = new System.Drawing.Size(149, 131);
+            this.IBScreen2.Size = new System.Drawing.Size(404, 225);
             this.IBScreen2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.IBScreen2.TabIndex = 6;
             this.IBScreen2.TabStop = false;
             // 
             // IBScreen3
             // 
+            this.IBScreen3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.IBScreen3.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.IBScreen3.Location = new System.Drawing.Point(646, 459);
+            this.IBScreen3.Location = new System.Drawing.Point(608, 341);
             this.IBScreen3.Name = "IBScreen3";
-            this.IBScreen3.Size = new System.Drawing.Size(149, 131);
+            this.IBScreen3.Size = new System.Drawing.Size(202, 112);
             this.IBScreen3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.IBScreen3.TabIndex = 7;
             this.IBScreen3.TabStop = false;
             // 
             // IBScreen4
             // 
+            this.IBScreen4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.IBScreen4.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.IBScreen4.Location = new System.Drawing.Point(806, 459);
+            this.IBScreen4.Location = new System.Drawing.Point(2, 228);
             this.IBScreen4.Name = "IBScreen4";
-            this.IBScreen4.Size = new System.Drawing.Size(149, 131);
+            this.IBScreen4.Size = new System.Drawing.Size(404, 225);
             this.IBScreen4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.IBScreen4.TabIndex = 8;
             this.IBScreen4.TabStop = false;
@@ -243,25 +247,26 @@ namespace AutoPilotNet
             // 
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1211, 653);
+            this.Controls.Add(this.txtinfo);
+            this.Controls.Add(this.IBScreen1);
             this.Controls.Add(this.cbAutoScan);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cbOptimize);
             this.Controls.Add(this.cbPause);
-            this.Controls.Add(this.txtinfo);
             this.Controls.Add(this.lTime);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.IBTemplate);
             this.Controls.Add(this.IBSource);
-            this.Controls.Add(this.IBScreen4);
             this.Controls.Add(this.IBScreen3);
             this.Controls.Add(this.IBScreen2);
-            this.Controls.Add(this.IBScreen1);
             this.Controls.Add(this.txtrefresh);
             this.Controls.Add(this.IMTEMP);
             this.Controls.Add(this.ibGravidar);
+            this.Controls.Add(this.IBScreen4);
             this.Controls.Add(this.ibVisual);
             this.KeyPreview = true;
+            this.MaximumSize = new System.Drawing.Size(1227, 692);
             this.MinimumSize = new System.Drawing.Size(1000, 649);
             this.Name = "VisualForm";
             this.Text = "Auto Pilot";

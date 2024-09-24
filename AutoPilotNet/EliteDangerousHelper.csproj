@@ -53,6 +53,11 @@
   <ItemGroup>
     <Compile Include="KeyBoardHook.cs" />
     <Compile Include="Keys.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="RECT.cs" />
     <Compile Include="SuperImage.cs" />
     <Compile Include="TypeSendMouse.cs" />
@@ -133,6 +138,10 @@
     <Content Include="License-LGPL.txt" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="VisualForm.resx">
       <DependentUpon>VisualForm.cs</DependentUpon>
     </EmbeddedResource>
