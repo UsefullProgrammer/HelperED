@@ -37,7 +37,7 @@ namespace AutoPilotNet
         bool bSendKey = true;
         bool Helper = true;
         bool optimize = true;
-        int reportlevel = 0;
+        int reportlevel = 4;
         bool reportkeysend = false;
         bool Pause = false;
         //-------------
@@ -89,6 +89,145 @@ namespace AutoPilotNet
             LoadImage();
            
 
+        }
+        private void Bot_Helper_ED()
+        {
+            while (true)
+            {
+                while (!Pause && autoscan)
+                {
+                    Thread.Sleep(msRefresh);
+                    sw.Restart();
+                    GetScreen();
+                    if (true && wasfocus)
+                    {
+                        if (debug)
+                        {
+
+                            Report("havepressj:" + havepressj);
+                            Report("dateTravel.AddMilliseconds(jumpingtime*2) > DateTime.Now:" + (dateTravel.AddMilliseconds(jumpingtime * 3) > DateTime.Now));
+                            //10+10 > 30 
+
+                        }
+                        bool bMassLocked = !FindTemplate(Screen3, MassLocked, Visual, 0.85).IsEmpty;
+                        //todo mining.
+                        if (_jkeypress)
+                        {
+                            Tryed = 0;
+                            Report("In charging jumping");
+                            //chargingjumping
+                            Thread.Sleep((int)(jumpingtime));
+                            PrecJumping = 0.45;
+                            _jkeypress = false;
+                            havepressj = true;
+                            dateTravel = DateTime.Now;
+                        }
+                        //else if(!havepressj)
+                        //    Thread.Sleep(jumpingtime/4);
+                        if (bMassLocked)
+                        {
+                            Report("In MassLocked AP suspend");
+                            //if (RGravidar.IsEmpty)
+                            //    RGravidar = GetRectangle(Screen4, Gravidar, 0.65);
+                            sw.Stop();
+                            Thread.Sleep(5000);
+                            sw.Start();
+                            continue;
+                        }
+                        else if (havepressj
+                            && (!FindTemplate(Screen4, Jumping, PrecJumping, true, true).IsEmpty || !FindTemplate(Screen4, Jumping2, PrecJumping, true, true).IsEmpty))
+                        { //se è in salto non fare niente controllare per quando esce!
+                            Report("In jumping");
+                            PrecJumping = 0.6;
+                            sw.Stop();
+                            Thread.Sleep((int)(timetravel / 2));
+                            if (!bJumped)
+                                Thread.Sleep((int)(timetravel / 2));
+                            sw.Start();
+                            bJumped = true;
+                        }
+                        else
+                        {
+
+                            if (bJumped)
+                            {
+                                Report("Leave by jumping");
+                                bJumped = false;
+                                havepressj = false;
+                                ZeroThrust();
+                                if (reportlevel > 0)
+                                    Report("Auto scan system run");
+                                SendKeys(VirtualKeyCode.OEM_MINUS, 30 * 6, true, true, true);
+                                int TimeForNextJump = (int)((jumpingtime + jumpcooldown) * 0.9);
+                                sw.Stop();
+                                Thread.Sleep(TimeForNextJump);
+                                sw.Start();
+                                //manovra d'evasione
+                            }
+                            else
+                            {//sistema ricorsivo di controllo.
+
+                                //Thread.Sleep(msRefresh);
+                                if (Tryed > LimitTry)//troppi tentativi
+                                {
+                                    havepressj = false;
+                                    Tryed = 0;
+                                    Thread.Sleep(msRefresh * 12);
+                                }
+                                if (havepressj)
+                                {
+                                    Tryed++;
+                                    if (DateTime.Now > dateTravel.AddMilliseconds(jumpingtime * 3))//troppo tempo
+                                    {
+                                        bJumped = false;
+                                        havepressj = false;
+                                        Thread.Sleep(msRefresh * 12);
+                                    }
+                                }
+                            }
+
+                            //if (debug)
+                            //    Report("Check if not want jump");
+                            //if (false && !bJumped && FindTemplate(Screen4, ISystem, 0.51,false,debug).IsEmpty)
+                            //{
+                            //    Report("Not want jump in eco mod for " + (timetravel + jumpingtime / 2)/1000 + " Seconds");
+                            //    sw.Stop();
+                            //    Thread.Sleep(timetravel + jumpingtime/2);
+                            //    sw.Start();
+                            //}
+
+                        }
+
+                    }
+                    sw.Stop();
+                    if (msAverage == -1)
+                        msAverage = (int)sw.ElapsedMilliseconds;
+                    else
+                        msAverage = ((int)sw.ElapsedMilliseconds + msAverage) / 2;
+                    lTime.Invoke(new Action(() => lTime.Text = msAverage.ToString()));
+                }
+                Thread.Sleep(5000);
+                if (debug)
+                {
+                    if (DateTime.Now > pausetime.AddSeconds(5))
+                    {
+                        Report("botHelper enable");
+
+                        Pause = false;
+                    }
+                }
+                else if (DateTime.Now > pausetime.AddMinutes(15))
+                {
+                    Report("botHelper enable");
+                    if (cbPause.InvokeRequired)
+                    {
+                        cbPause.Invoke(new Action(() => cbPause.Checked = false));
+                    }
+                    else
+                        cbPause.Checked = false;
+                    Pause = false;
+                }
+            }
         }
         public void LoadImage()
         {
@@ -187,17 +326,11 @@ namespace AutoPilotNet
             if (TypeSendMouse.RightMouse == tsm)
             {
                 if (debug) Report("Begin send mouse");
-                mousesim.RightButtonDown();
+                mousesim.RightButtonDown().Sleep(34* TimesDown);
             }
             else if (TypeSendMouse.LeftMouse == tsm)
             {
-                mousesim.LeftButtonDown();
-            }
-            for (int i = 0; i < TimesDown; i++)
-            {
-                
-
-                Thread.Sleep(34);
+                mousesim.LeftButtonDown().Sleep(34 * TimesDown);
             }
             if (TypeSendMouse.RightMouse == tsm)
             {
@@ -1057,145 +1190,7 @@ namespace AutoPilotNet
         bool autoscan = true;
         byte Tryed = 0;
         byte LimitTry = 17;
-        private void Bot_Helper_ED()
-        {
-            while (true)
-            {
-                while (!Pause && autoscan)
-                {
-                    Thread.Sleep(msRefresh);
-                    sw.Restart();
-                    GetScreen();
-                    if (true && wasfocus)
-                    {
-                        if(debug)
-                        {
-
-                            Report("havepressj:"  + havepressj);
-                            Report("dateTravel.AddMilliseconds(jumpingtime*2) > DateTime.Now:" + (dateTravel.AddMilliseconds(jumpingtime * 3) > DateTime.Now));
-                            //10+10 > 30 
-
-                        }
-                        bool bMassLocked = !FindTemplate(Screen3, MassLocked, Visual, 0.85).IsEmpty;
-                        //todo mining.
-                        if (_jkeypress)
-                        {
-                            Tryed = 0;
-                            Report("In charging jumping");
-                            //chargingjumping
-                            Thread.Sleep((int)(jumpingtime));
-                            PrecJumping = 0.45;
-                            _jkeypress = false;
-                            havepressj = true;
-                            dateTravel = DateTime.Now;
-                        }
-                        //else if(!havepressj)
-                        //    Thread.Sleep(jumpingtime/4);
-                        if (bMassLocked)
-                        {
-                            Report("In MassLocked AP suspend");
-                            //if (RGravidar.IsEmpty)
-                            //    RGravidar = GetRectangle(Screen4, Gravidar, 0.65);
-                            sw.Stop();
-                            Thread.Sleep(5000);
-                            sw.Start();
-                            continue;
-                        }
-                        else if ( havepressj
-                            && (!FindTemplate(Screen4, Jumping, PrecJumping, true,true).IsEmpty || !FindTemplate(Screen4, Jumping2, PrecJumping, true, true).IsEmpty))
-                        { //se è in salto non fare niente controllare per quando esce!
-                            Report("In jumping");
-                            PrecJumping = 0.6;
-                            sw.Stop();
-                            Thread.Sleep((int)(timetravel / 2));
-                            if (!bJumped)
-                                Thread.Sleep((int)(timetravel / 2));
-                            sw.Start();
-                            bJumped = true;
-                        }
-                        else
-                        {
-
-                            if (bJumped)
-                            {
-                                Report("Leave by jumping");
-                                bJumped = false;
-                                havepressj = false;
-                                ZeroThrust();
-                                if (reportlevel > 0)
-                                    Report("Auto scan system run");
-                                SendKeys(VirtualKeyCode.OEM_MINUS, 30 * 6, true, true, true);
-                                int TimeForNextJump = (int)((jumpingtime + jumpcooldown) * 0.9);
-                                sw.Stop();
-                                Thread.Sleep(TimeForNextJump);
-                                sw.Start();
-                                //manovra d'evasione
-                            }
-                            else
-                            {//sistema ricorsivo di controllo.
-
-                                //Thread.Sleep(msRefresh);
-                                if (Tryed > LimitTry)//troppi tentativi
-                                {
-                                    havepressj = false;
-                                    Tryed = 0;
-                                    Thread.Sleep(msRefresh * 12);
-                                }
-                                if (havepressj)
-                                {
-                                    Tryed++;
-                                    if (dateTravel.AddMilliseconds(jumpingtime * 3) > DateTime.Now)//troppo tempo
-                                    {
-                                        bJumped = false;
-                                        havepressj = false;
-                                        Thread.Sleep(msRefresh * 12);
-                                    }
-                                }
-                            }
-                            
-                            //if (debug)
-                            //    Report("Check if not want jump");
-                            //if (false && !bJumped && FindTemplate(Screen4, ISystem, 0.51,false,debug).IsEmpty)
-                            //{
-                            //    Report("Not want jump in eco mod for " + (timetravel + jumpingtime / 2)/1000 + " Seconds");
-                            //    sw.Stop();
-                            //    Thread.Sleep(timetravel + jumpingtime/2);
-                            //    sw.Start();
-                            //}
-
-                        }
-                        
-                    }
-                    sw.Stop();
-                    if (msAverage == -1)
-                        msAverage = (int)sw.ElapsedMilliseconds;
-                    else
-                        msAverage = ((int)sw.ElapsedMilliseconds + msAverage) / 2;
-                    lTime.Invoke(new Action(() => lTime.Text = msAverage.ToString()));
-                }
-                Thread.Sleep(5000);
-                if (debug)
-                {
-                    if (DateTime.Now > pausetime.AddSeconds(5))
-                    {
-                        Report("botHelper enable");
-                        
-                        Pause = false;
-                    }
-                }
-                else if(DateTime.Now > pausetime.AddMinutes(15))
-                {
-                    Report("botHelper enable");
-                    if (cbPause.InvokeRequired)
-                    {
-                        cbPause.Invoke(new Action(() => cbPause.Checked = false));
-                    }
-                    else
-                        cbPause.Checked = false;
-                    Pause = false;
-                }
-            }
-        }
+        
         private void VisualForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             bwAutopilot.CancelAsync();
@@ -1244,76 +1239,99 @@ namespace AutoPilotNet
         bool fire = false;
         
         BackgroundWorker bwAutoFire = new BackgroundWorker();
+        bool bwAutoFireBusy = false;
         void KeyboardHook_KeyPressed(object sender, KeyPressedEventArgs e)
         {
-            
-            if (e.KeyCode == Keys.RControlKey)
+            if (!bwAutoFireBusy)
             {
-                if(Pause)
+                if (e.KeyCode == Keys.RControlKey)
                 {
-                    
-                    Pause = false;
-                    Report("botHelper enable");
+                    if (Pause)
+                    {
+
+                        Pause = false;
+                        Report("botHelper enable");
+                    }
+                    else
+                    {
+                        pausetime = DateTime.Now;
+                        Pause = true;
+                        Report("botHelper disable he return on in 15 minutes");
+                    }
+                    cbPause.Checked = Pause;
+                    if (debug)
+                    {
+                        if (fire || autofireon)
+                        { autofireon = false; fire = false; Report("Autofire off"); }
+                        else { autofireon = true; Report("Autofire on"); }
+                    }
                 }
-                else
+                if (e.KeyCode == Keys.Home)
                 {
-                    pausetime = DateTime.Now;
-                    Pause = true;
-                    Report("botHelper disable he return on in 15 minutes");
+                    cbAutoScan.Checked = !cbAutoScan.Checked;
                 }
-                cbPause.Checked = Pause;
-                if (debug)
+                if (Keys.Oem7 == e.KeyCode)//à
                 {
-                    if (fire || autofireon)
-                    { autofireon = false; fire = false; Report("Autofire off"); }
-                    else { autofireon = true; Report("Autofire on"); }
-                }
-            }
-            if (e.KeyCode == Keys.Home)
-            {
-                cbAutoScan.Checked = !cbAutoScan.Checked;
-            }
-            if (Keys.Oem7 == e.KeyCode)//à
-            {
-                //if (!bwAutoFire.IsBusy)
-                //{
-                //    bwAutoFire.DoWork += new DoWorkEventHandler(
-                //    delegate (object o, DoWorkEventArgs args)
-                //    {
+                    //if (!bwAutoFire.IsBusy)
+                    //{
+                    bwAutoFire.DoWork += new DoWorkEventHandler(
+
+                    delegate (object o, DoWorkEventArgs args)
+                    {
+                        bwAutoFireBusy = true;
                         SendMouse(TypeSendMouse.LeftMouse, 30 * 6);
-                //    });
-                //    bwAutoFire.RunWorkerAsync();
-                //}
-            }
-            if(Keys.OemQuestion == e.KeyCode)//ù
-            {
-                //if (!bwAutoFire.IsBusy)
-                //{
-                //    bwAutoFire.DoWork += new DoWorkEventHandler(
-                //    delegate (object o, DoWorkEventArgs args)
-                //    {
-                        SendMouse(TypeSendMouse.RightMouse, 30 * 6);
-                //    });
-                //    bwAutoFire.RunWorkerAsync();
-                //}
-            }
-            if (debug && Keys.Insert == e.KeyCode)
-            {
-                SendKeys(VirtualKeyCode.DOWN, 2, false, false,false,true);
-                SendKeys(VirtualKeyCode.VK_S, 30 , false, false);
-                
-            }
-                //if(Keys.)
-            if (Keys.OemMinus == e.KeyCode)
-            {
-                
-                if (autofireon && !fire && !bwAutoFire.IsBusy)//se è in modalità automatica e non sta sparando
+                        bwAutoFireBusy = false;
+                    });
+                    bwAutoFire.RunWorkerAsync();
+                    //}
+                }
+                if (Keys.Oemplus == e.KeyCode)//ù
                 {
+                    //if (!bwAutoFire.IsBusy)
+                    //{
+                    bwAutoFire.DoWork += new DoWorkEventHandler(
+                    delegate (object o, DoWorkEventArgs args)
+                    {
+                        bwAutoFireBusy = true;
+                        SendMouse(TypeSendMouse.RightMouse, 30 * 8);
+                        bwAutoFireBusy = false;
+                    });
+                    bwAutoFire.RunWorkerAsync();
+                    //}
+                }
+                if (Keys.OemQuestion == e.KeyCode)//ù
+                {
+                    //if (!bwAutoFire.IsBusy)
+                    //{
+                    bwAutoFire.DoWork += new DoWorkEventHandler(
+                    delegate (object o, DoWorkEventArgs args)
+                    {
+                        bwAutoFireBusy = true;
+                        SendMouse(TypeSendMouse.RightMouse, 30 * 6);
+                        bwAutoFireBusy = false;
+                    });
+                    bwAutoFire.RunWorkerAsync();
+                    //}
+                }
+                if (debug && Keys.Insert == e.KeyCode)
+                {
+                    SendKeys(VirtualKeyCode.DOWN, 2, false, false, false, true);
+                    SendKeys(VirtualKeyCode.VK_S, 30, false, false);
+
+                }
+                //if(Keys.)
+                if (Keys.OemMinus == e.KeyCode)
+                {
+
+                    if (autofireon && !fire && !bwAutoFire.IsBusy)//se è in modalità automatica e non sta sparando
+                    {
                         Report("Autoscan: fire with second fire");
                         bwAutoFire.DoWork += new DoWorkEventHandler(
                         delegate (object o, DoWorkEventArgs args)
                         {
+                            bwAutoFireBusy = true;
                             SendKeys(VirtualKeyCode.OEM_MINUS, 30 * 6, false, false);
+                            bwAutoFireBusy = false;
                             //bool bStopfire = false;
 
 
@@ -1330,11 +1348,12 @@ namespace AutoPilotNet
                             //}
                         });
                         bwAutoFire.RunWorkerAsync();
+                    }
+                    //else if (fire)//sennò lo fermo semplicemente, facendo decadere il backgroundworker
+                    //{
+                    //    fire = false;
+                    //}
                 }
-                //else if (fire)//sennò lo fermo semplicemente, facendo decadere il backgroundworker
-                //{
-                //    fire = false;
-                //}
             }
             if (Keys.J == e.KeyCode)
             {
