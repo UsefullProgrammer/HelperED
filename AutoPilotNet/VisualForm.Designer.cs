@@ -237,9 +237,9 @@ namespace AutoPilotNet
             this.cbAutoScan.AutoSize = true;
             this.cbAutoScan.Location = new System.Drawing.Point(118, 627);
             this.cbAutoScan.Name = "cbAutoScan";
-            this.cbAutoScan.Size = new System.Drawing.Size(308, 17);
+            this.cbAutoScan.Size = new System.Drawing.Size(290, 17);
             this.cbAutoScan.TabIndex = 18;
-            this.cbAutoScan.Text = "Auto scan quindo esci da un sistema parte autoscan (inizio) ";
+            this.cbAutoScan.Text = "Auto scan quindo esci da un sistema parte autoscan (/) ";
             this.cbAutoScan.UseVisualStyleBackColor = true;
             this.cbAutoScan.CheckedChanged += new System.EventHandler(this.cbAutoScan_CheckedChanged);
             // 

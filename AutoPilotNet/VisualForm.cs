@@ -38,7 +38,7 @@ namespace AutoPilotNet
         bool Helper = true;
         bool optimize = true;
         int reportlevel = 4;
-        bool reportkeysend = false;
+        bool reportkeysend = true;
         bool Pause = false;
         //-------------
         String PathImageToLoad;
@@ -116,7 +116,7 @@ namespace AutoPilotNet
                             Tryed = 0;
                             Report("In charging jumping");
                             //chargingjumping
-                            Thread.Sleep((int)(jumpingtime));
+                            Thread.Sleep((int)(jumpingtime*0.9));
                             PrecJumping = 0.45;
                             _jkeypress = false;
                             havepressj = true;
@@ -158,7 +158,7 @@ namespace AutoPilotNet
                                 if (reportlevel > 0)
                                     Report("Auto scan system run");
                                 SendKeys(VirtualKeyCode.OEM_MINUS, 30 * 6, true, true, true);
-                                int TimeForNextJump = (int)((jumpingtime + jumpcooldown) * 0.9);
+                                int TimeForNextJump = (int)((jumpingtime + jumpcooldown) * 0.75);
                                 sw.Stop();
                                 Thread.Sleep(TimeForNextJump);
                                 sw.Start();
@@ -176,6 +176,7 @@ namespace AutoPilotNet
                                 }
                                 if (havepressj)
                                 {
+                                    Thread.Sleep(msRefresh);
                                     Tryed++;
                                     if (DateTime.Now > dateTravel.AddMilliseconds(jumpingtime * 3))//troppo tempo
                                     {
@@ -1244,6 +1245,8 @@ namespace AutoPilotNet
         {
             if (!bwAutoFireBusy)
             {
+                bwAutoFire.Dispose();
+                bwAutoFire = new BackgroundWorker();
                 if (e.KeyCode == Keys.RControlKey)
                 {
                     if (Pause)
@@ -1266,7 +1269,7 @@ namespace AutoPilotNet
                         else { autofireon = true; Report("Autofire on"); }
                     }
                 }
-                if (e.KeyCode == Keys.Home)
+                if (e.KeyCode == Keys.Divide)
                 {
                     cbAutoScan.Checked = !cbAutoScan.Checked;
                 }
@@ -1274,6 +1277,7 @@ namespace AutoPilotNet
                 {
                     //if (!bwAutoFire.IsBusy)
                     //{
+                    Report("botHelper left click for  30 * 6");
                     bwAutoFire.DoWork += new DoWorkEventHandler(
 
                     delegate (object o, DoWorkEventArgs args)
@@ -1285,15 +1289,16 @@ namespace AutoPilotNet
                     bwAutoFire.RunWorkerAsync();
                     //}
                 }
-                if (Keys.Oemplus == e.KeyCode)//ù
+                if (Keys.Oemplus == e.KeyCode)//+
                 {
                     //if (!bwAutoFire.IsBusy)
                     //{
+                    Report("botHelper right click for  30 * 9");
                     bwAutoFire.DoWork += new DoWorkEventHandler(
                     delegate (object o, DoWorkEventArgs args)
                     {
                         bwAutoFireBusy = true;
-                        SendMouse(TypeSendMouse.RightMouse, 30 * 8);
+                        SendMouse(TypeSendMouse.RightMouse, 30 * 10);
                         bwAutoFireBusy = false;
                     });
                     bwAutoFire.RunWorkerAsync();
@@ -1303,6 +1308,7 @@ namespace AutoPilotNet
                 {
                     //if (!bwAutoFire.IsBusy)
                     //{
+                    Report("botHelper right click for  30 * 6");
                     bwAutoFire.DoWork += new DoWorkEventHandler(
                     delegate (object o, DoWorkEventArgs args)
                     {
@@ -1323,7 +1329,7 @@ namespace AutoPilotNet
                 if (Keys.OemMinus == e.KeyCode)
                 {
 
-                    if (autofireon && !fire && !bwAutoFire.IsBusy)//se è in modalità automatica e non sta sparando
+                    if (autofireon && !fire)//se è in modalità automatica e non sta sparando
                     {
                         Report("Autoscan: fire with second fire");
                         bwAutoFire.DoWork += new DoWorkEventHandler(
